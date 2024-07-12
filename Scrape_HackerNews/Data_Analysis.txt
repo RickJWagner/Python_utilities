@@ -1,0 +1,50 @@
+
+Who makes the most comments?
+    User is the 3rd field in the file.
+    awk -F ":" {'print $3'} comments.txt | sort | uniq -c | sort -n 
+
+
+Who submits the most articles?
+    Author is the 2nd field in the file.
+    awk -F ":" {'print $2'} articles.txt | sort | uniq -c | sort -n
+
+
+Which words are most popular in comments?
+library(dplyr)
+library(tidytext)
+library(ggplot2)
+
+issue_titles <- readLines("comments.txt")
+issue_titles_df <- data_frame(Text = issue_titles) # tibble aka neater data frame
+# The unnest_tokens() function from the tidytext package picks out the individual words and places them as rows.
+issue_words <- issue_titles_df %>% unnest_tokens(output = word, input = Text)
+# An anti_join() is used to remove stopwords from issue_words().
+issue_words <- issue_words %>% anti_join(stop_words) # Remove stop words
+# Word Counts:
+issue_wordcounts <- issue_words %>% count(word, sort = TRUE)
+# ggplot2 Plot:
+issue_wordcounts %>%
+  filter(n > 5) %>%
+  mutate(word = reorder(word, n)) %>%
+	ggplot(aes(word, n)) +
+	geom_col() +
+	coord_flip() +
+	labs(x = "Word \n", y = "\n Count ", title = "Frequent Words In Hacker News Comments\n") +
+	geom_text(aes(label = n), hjust = 1.2, colour = "white", fontface = "bold") +
+	theme(plot.title = element_text(hjust = 0.5),
+    	axis.title.x = element_text(face="bold", colour="darkblue", size = 12),
+    	axis.title.y = element_text(face="bold", colour="darkblue", size = 12))
+
+
+
+# Advanced
+
+Which articles have the most positive comments?
+
+Which articles have the most negative comments?
+
+Which users make the most positive comments?
+
+Which users make the most negative comments?
+
+
